@@ -6,6 +6,8 @@ scalaVersion := "2.9.2"
 
 libraryDependencies += "org.spark-project" %% "spark-core" % "0.6.2"
 
+libraryDependencies += "commons-cli" % "commons-cli" % "1.2"
+
 resolvers ++= Seq(
     "Akka Repository" at "http://repo.akka.io/releases/",
     "Spray Repository" at "http://repo.spray.cc/")
