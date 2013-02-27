@@ -8,6 +8,7 @@ import sgc.graph.{VertexIDParser, ArrayVertexID}
 object CuboidQuery {
 
   def query(rdd : RDD[Pair[String,Long]], fun : AggregateFunction, numberOfDimensions : Int ) : RDD[Pair[String,Long]] = {
-    rdd.map( entry => fun.aggregateVertex(VertexIDParser.parseID(entry_1)))
+    val inter = rdd.map( entry => Pair(fun.aggregate(VertexIDParser.parseID(entry._1)), entry._2))
+    inter.reduceByKey(_ + _)
   }
 }

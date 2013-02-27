@@ -2,7 +2,7 @@ package sgc.cuboid
 
 import sgc.graph.ArrayVertexID
 
-class AggregateFunction (val dimToAggregate : Seq[Int]) {
+class AggregateFunction (val dimToAggregate : Seq[Int]) extends Serializable {
 
   /**
    *
@@ -13,11 +13,19 @@ class AggregateFunction (val dimToAggregate : Seq[Int]) {
     dimToAggregate.contains(dim)
   }
 
-  def aggregate(vertexOrEdge : Array[ArrayVertexID])
-  def aggregateVertex(vertex : ArrayVertexID)  {
+  def aggregate(vertexOrEdge : Array[ArrayVertexID])    = {
+    def toAggregateList(index : Int) : List[String] = {
+      if (index == vertexOrEdge.length) return Nil
+      aggregateVertex(vertexOrEdge(index)).toString("₠") :: toAggregateList(index + 1)
+    }
+    toAggregateList(0).mkString("ϱ")
+  }
+
+  def aggregateVertex(vertex : ArrayVertexID) = {
     for(dim <- dimToAggregate){
       vertex.setDimension(dim, vertex.getDimension(dim).getAggregate )
     }
+    vertex
   }
 
   /**

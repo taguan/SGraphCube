@@ -9,6 +9,7 @@ import materialization._
 import cuboid._
 
 import org.apache.commons.cli._
+import com.esotericsoftware.kryo.Kryo
 
 object SGraphCube {
 
@@ -79,15 +80,19 @@ object SGraphCube {
      * Initialization of the spark environment
      */ 
     System.setProperty("spark.serializer", "spark.KryoSerializer")
+
     val sc = new SparkContext(cmd.getOptionValue("sc","local[2]"),"SGraphCube",
       cmd.getOptionValue("sh","."), List(cmd.getOptionValue("jar",
         "target/scala-2.9.2/sgraph-cube_2.9.2-1.0.jar")))
 
     val inputGraph = sc.textFile(cmd.getOptionValue("inp")).map(parseLine(_))
-    val cube = new GraphCube(cmd.getOptionValue("n").toInt,cmd.getOptionValue("ml").toInt,
-      CuboidEntry(AggregateFunction(""),Long.MaxValue,inputGraph))
+    //val cube = new GraphCube(cmd.getOptionValue("n").toInt,cmd.getOptionValue("ml").toInt,
+     // CuboidEntry(AggregateFunction(""),Long.MaxValue,inputGraph))
 
-    println(cube.getBaseCuboid.cuboid.count())
+    //println(cube.getBaseCuboid.cuboid.count())
+
+    val rdd = CuboidQuery.query(inputGraph,AggregateFunction("1,2"),cmd.getOptionValue("n").toInt)
+    println(rdd.first())
   }
 
 
@@ -103,4 +108,6 @@ object SGraphCube {
     }
   }
 
+
 }
+
