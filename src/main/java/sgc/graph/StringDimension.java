@@ -1,4 +1,4 @@
-package main.java.sgc.graph;
+package sgc.graph;
 
 public class StringDimension implements Dimension {
 

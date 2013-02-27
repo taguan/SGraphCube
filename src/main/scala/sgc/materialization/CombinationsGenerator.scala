@@ -1,4 +1,4 @@
-package main.scala.sgc.materialization
+package sgc.materialization
 
 /**
  * @author : http://rosettacode.org/wiki/Combinations#Scala

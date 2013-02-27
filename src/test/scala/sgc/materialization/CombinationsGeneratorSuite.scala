@@ -2,7 +2,7 @@ package sgc.materialization.test
 
 import org.scalatest.FunSuite
 
-import main.scala.sgc.materialization.CombinationsGenerator
+import sgc.materialization.CombinationsGenerator
 
 class CombinationsGeneratorSuite extends FunSuite {
 

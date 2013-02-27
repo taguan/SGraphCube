@@ -1,6 +1,6 @@
-package main.scala.sgc.cuboid
+package sgc.cuboid
 
-import main.java.sgc.graph.ArrayVertexID
+import sgc.graph.ArrayVertexID
 
 class AggregateFunction (dimToAggregate : Seq[Int]) {
  

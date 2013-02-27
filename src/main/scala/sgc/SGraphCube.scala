@@ -1,4 +1,4 @@
-package main.scala.sgc
+package sgc
 
 import java.io.IOException
 
@@ -80,7 +80,6 @@ object SGraphCube {
 
   /**
    * Parses a key value Pair from a line around a tab character
-   * @throw IOException
    */
   def parseLine(line : String) = {
     val regex = """([^\t]+)\t([^\t]+)""".r

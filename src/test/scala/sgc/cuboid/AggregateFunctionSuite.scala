@@ -2,8 +2,8 @@ package sgc.cuboid.test
 
 import org.scalatest.FunSuite
 import org.scalatest.BeforeAndAfter
-import main.scala.sgc.cuboid.AggregateFunction
-import main.java.sgc.graph._
+import sgc.cuboid.AggregateFunction
+import sgc.graph._
 
 class AggregateFunctionSuite extends FunSuite with BeforeAndAfter {
 
