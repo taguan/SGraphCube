@@ -15,15 +15,6 @@ public class ArrayVertexID {
 		this.dimensions = dimensions;
 	}
 
-	public void setNbrOfDimensions(int nbrOfDimensions){
-		this.nbrOfDimensions = nbrOfDimensions;
-	}
-
-	public int getNbrOfDimensions(){
-		return nbrOfDimensions;
-	}
-
-
 	public Dimension getDimension(int index){
 		return dimensions[index];
 	}
@@ -33,7 +24,7 @@ public class ArrayVertexID {
 	}
 
 	public String toString(String delimiter){
-		StringBuffer strb = new StringBuffer();
+		StringBuilder strb = new StringBuilder();
 		for(int i = 0; i<dimensions.length-1; i++){
 			strb.append(dimensions[i].toString());
 			strb.append(delimiter);

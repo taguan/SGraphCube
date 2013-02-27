@@ -5,24 +5,27 @@ import java.io.IOException
 import spark.KryoRegistrator
 import spark.SparkContext
 import SparkContext._
+import materialization._
+import cuboid._
 
 import org.apache.commons.cli._
 
 object SGraphCube {
 
-  def main(args : Array[String]) = {
+  def main(args : Array[String]) {
 
     /**
      * Defines options for the command line
      * parser
      */
-    def getOptions() : Options = {
+    def getOptions : Options = {
       val options = new Options()
       options.addOption("h","help",false,"Display help")
       options.addOption("inp","inputPath",true,"Base graph input path, for " +
         "example : hdfs://namenode:54310/yourhdfspath")
         options.addOption("k","maxCuboids",true,"Maximum number of cuboids to materialize")
         options.addOption("ml","minLevel",true,"Starting dimension for the MinLevel algorithm")
+        options.addOption("n", "dimensions", true, "Number of dimensions")
         options.addOption("sc","sparkContext",true,"Spark Context argument, for "
           + "default : local[2]")
         options.addOption("sh","sparkHome",true,"Path to spark home installation, default : .")
@@ -34,12 +37,12 @@ object SGraphCube {
     /**
      * Prints a well formatted help
      */
-    def printHelp() = {
+    def printHelp() {
       val formatter = new HelpFormatter()
-      formatter.printHelp("SGraphCube",getOptions(),true)
+      formatter.printHelp("SGraphCube",getOptions,true)
     }
 
-    val options = getOptions()
+    val options = getOptions
     val parser = new BasicParser()
     val cmd = parser.parse(options, args)
 
@@ -62,6 +65,14 @@ object SGraphCube {
 
     if(!cmd.hasOption("ml")){
       println("Min Level starting point required")
+      printHelp()
+      sys.exit(0)
+    }
+
+    if (!cmd.hasOption("n")){
+      println("Number of dimensions required")
+      printHelp()
+      sys.exit(0)
     }
 
     /**
@@ -73,8 +84,10 @@ object SGraphCube {
         "target/scala-2.9.2/sgraph-cube_2.9.2-1.0.jar")))
 
     val inputGraph = sc.textFile(cmd.getOptionValue("inp")).map(parseLine(_))
+    val cube = new GraphCube(cmd.getOptionValue("n").toInt,cmd.getOptionValue("ml").toInt,
+      CuboidEntry(AggregateFunction(""),Long.MaxValue,inputGraph))
 
-    println(inputGraph.count())
+    println(cube.getBaseCuboid.cuboid.count())
   }
 
 

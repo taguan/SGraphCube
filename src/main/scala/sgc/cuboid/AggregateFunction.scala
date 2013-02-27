@@ -13,6 +13,7 @@ class AggregateFunction (val dimToAggregate : Seq[Int]) {
     dimToAggregate.contains(dim)
   }
 
+  def aggregate(vertexOrEdge : Array[ArrayVertexID])
   def aggregateVertex(vertex : ArrayVertexID)  {
     for(dim <- dimToAggregate){
       vertex.setDimension(dim, vertex.getDimension(dim).getAggregate )
