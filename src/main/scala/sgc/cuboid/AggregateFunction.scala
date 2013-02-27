@@ -2,15 +2,20 @@ package sgc.cuboid
 
 import sgc.graph.ArrayVertexID
 
-class AggregateFunction (dimToAggregate : Seq[Int]) {
- 
+class AggregateFunction (val dimToAggregate : Seq[Int]) {
+
+  /**
+   *
+   * @param dim  index of a dimension
+   * @return     true if the input dim is aggregated with this function
+   */
   def isAggregated(dim : Int) : Boolean = {
     dimToAggregate.contains(dim)
   }
 
-  def aggregateVertex(vertex : ArrayVertexID) = {
+  def aggregateVertex(vertex : ArrayVertexID)  {
     for(dim <- dimToAggregate){
-      vertex.setDimension(dim, vertex.getDimension(dim).getAggregate() )
+      vertex.setDimension(dim, vertex.getDimension(dim).getAggregate )
     }
   }
 
@@ -21,15 +26,22 @@ class AggregateFunction (dimToAggregate : Seq[Int]) {
    ** 
    ** @param inputFunction Function to be compared
    **/
-  def isDescendant(fun : AggregateFunction) = {
+  def isDescendant(fun : AggregateFunction) : Boolean = {
     for(dim <- dimToAggregate){
-      if(!fun.isAggregated(dim)) false
+      if(!fun.isAggregated(dim)) return false
     }
     true
   }
 
-  override def toString() = {
+  override def toString = {
     dimToAggregate.mkString(",")
+  }
+
+  override def equals(that : Any) : Boolean = {
+    that match {
+      case fun : AggregateFunction => fun.dimToAggregate.equals(this.dimToAggregate)
+      case _ => false
+    }
   }
   
 }
