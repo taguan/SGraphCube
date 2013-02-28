@@ -2,16 +2,16 @@ package sgc
 
 import java.io.IOException
 
-import spark.KryoRegistrator
-import spark.SparkContext
+import spark.{Logging, KryoRegistrator, SparkContext}
 import SparkContext._
 import materialization._
 import cuboid._
 
 import org.apache.commons.cli._
 import com.esotericsoftware.kryo.Kryo
+import spark.storage.StorageLevel
 
-object SGraphCube {
+object SGraphCube extends Logging{
 
   def main(args : Array[String]) {
 
@@ -75,6 +75,7 @@ object SGraphCube {
       printHelp()
       sys.exit(0)
     }
+    val numberOfDimensions =  cmd.getOptionValue("n").toInt
 
     /**
      * Initialization of the spark environment
@@ -86,13 +87,17 @@ object SGraphCube {
         "target/scala-2.9.2/sgraph-cube_2.9.2-1.0.jar")))
 
     val inputGraph = sc.textFile(cmd.getOptionValue("inp")).map(parseLine(_))
-    //val cube = new GraphCube(cmd.getOptionValue("n").toInt,cmd.getOptionValue("ml").toInt,
-     // CuboidEntry(AggregateFunction(""),Long.MaxValue,inputGraph))
 
-    //println(cube.getBaseCuboid.cuboid.count())
+    val cube = MinLevelStrategy.materialize(cmd.getOptionValue("k").toInt,cmd.getOptionValue("ml").toInt,
+                numberOfDimensions,CuboidEntry(AggregateFunction(""),Long.MaxValue,inputGraph))
 
-    val rdd = CuboidQuery.query(inputGraph,AggregateFunction("1,2"),cmd.getOptionValue("n").toInt)
-    println(rdd.first())
+    val cuboid = cube.getNearestDescendant(AggregateFunction("0,1,2,3,4,5,6"))
+    val rdd = cuboid.cuboid.map(entry => Pair(entry._1,entry._2))
+    rdd.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    CuboidQuery.query(rdd,AggregateFunction("0,1,3,4,5,6"),numberOfDimensions).saveAsTextFile("hdfs://localhost:54310/user/benoit/test")
+    CuboidQuery.query(rdd,AggregateFunction("0,1,3,4,5,6"),numberOfDimensions).saveAsTextFile("hdfs://localhost:54310/user/benoit/test2")
+
+    sc.stop()
   }
 
 
