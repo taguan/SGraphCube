@@ -2,7 +2,7 @@ package sgc.cuboid
 
 import spark.RDD
 import spark.SparkContext._
-import sgc.graph.{VertexIDParser, ArrayVertexID}
+import sgc.graph.VertexIDParser
 
 
 object CuboidQuery {
