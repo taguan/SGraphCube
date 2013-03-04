@@ -10,6 +10,7 @@ import cuboid._
 import org.apache.commons.cli._
 import com.esotericsoftware.kryo.Kryo
 import spark.storage.StorageLevel
+import java.util.Scanner
 
 object SGraphCube extends Logging{
 
@@ -88,15 +89,54 @@ object SGraphCube extends Logging{
 
     val inputGraph = sc.textFile(cmd.getOptionValue("inp")).map(parseLine(_))
 
+    /**
+     * Materialization step
+     */
     val cube = MinLevelStrategy.materialize(cmd.getOptionValue("k").toInt,cmd.getOptionValue("ml").toInt,
                 numberOfDimensions,CuboidEntry(AggregateFunction(""),Long.MaxValue,inputGraph))
 
+    val reader = new Scanner(System.in)
+    var stop = false
+
+    /**
+     * Interactive querying
+     */
+    while(!stop) {
+      println("Waiting for a query.")
+      println("cuboid")
+      println("quit")
+
+      reader.nextLine() match {
+        case "cuboid" => interactiveCuboid()
+        case "quit" => stop = true
+        case _ => println("Unrecognized command")
+      }
+    }
+
+    def interactiveCuboid() {
+      println("Aggregate function ? Ex : 0,2")
+      val regex = """\d+(,\d+)*""".r
+      val userEntry = reader.nextLine()
+      userEntry match{
+        case regex(_)  => {
+          val fun = AggregateFunction(userEntry)
+          val descendant = cube.getNearestDescendant(fun).cuboid
+          val requestedGraph = CuboidQuery.query(descendant, fun, numberOfDimensions)
+          requestedGraph.persist(StorageLevel.MEMORY_ONLY)
+          //perform requests on it
+        }
+        case _ => println("wrongly formatted aggregate function")
+      }
+    }
+
+
+     /*
     val cuboid = cube.getNearestDescendant(AggregateFunction("0,1,2,3,4,5,6"))
     val rdd = cuboid.cuboid.map(entry => Pair(entry._1,entry._2))
     rdd.persist(StorageLevel.MEMORY_AND_DISK_SER)
     CuboidQuery.query(rdd,AggregateFunction("0,1,3,4,5,6"),numberOfDimensions).saveAsTextFile("hdfs://localhost:54310/user/benoit/test")
     CuboidQuery.query(rdd,AggregateFunction("0,1,3,4,5,6"),numberOfDimensions).saveAsTextFile("hdfs://localhost:54310/user/benoit/test2")
-
+     */
     sc.stop()
   }
 
