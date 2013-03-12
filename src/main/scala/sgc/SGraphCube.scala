@@ -121,9 +121,11 @@ object SGraphCube extends Logging{
         case regex(_)  => {
           val fun = AggregateFunction(userEntry)
           val descendant = cube.getNearestDescendant(fun).cuboid
-          val requestedGraph = CuboidQuery.query(descendant, fun, numberOfDimensions)
+          val requestedGraph = CuboidQuery.generateCuboid(descendant, fun, numberOfDimensions)
           requestedGraph.persist(StorageLevel.MEMORY_ONLY)
-          //perform requests on it
+
+          val graphAnalyser = new  GraphQuery(requestedGraph,reader)
+          graphAnalyser.interact()
         }
         case _ => println("wrongly formatted aggregate function")
       }
@@ -134,8 +136,8 @@ object SGraphCube extends Logging{
     val cuboid = cube.getNearestDescendant(AggregateFunction("0,1,2,3,4,5,6"))
     val rdd = cuboid.cuboid.map(entry => Pair(entry._1,entry._2))
     rdd.persist(StorageLevel.MEMORY_AND_DISK_SER)
-    CuboidQuery.query(rdd,AggregateFunction("0,1,3,4,5,6"),numberOfDimensions).saveAsTextFile("hdfs://localhost:54310/user/benoit/test")
-    CuboidQuery.query(rdd,AggregateFunction("0,1,3,4,5,6"),numberOfDimensions).saveAsTextFile("hdfs://localhost:54310/user/benoit/test2")
+    CuboidQuery.generateCuboid(rdd,AggregateFunction("0,1,3,4,5,6"),numberOfDimensions).saveAsTextFile("hdfs://localhost:54310/user/benoit/test")
+    CuboidQuery.generateCuboid(rdd,AggregateFunction("0,1,3,4,5,6"),numberOfDimensions).saveAsTextFile("hdfs://localhost:54310/user/benoit/test2")
      */
     sc.stop()
   }
