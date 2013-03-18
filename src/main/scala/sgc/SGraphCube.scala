@@ -2,13 +2,11 @@ package sgc
 
 import java.io.IOException
 
-import spark.{Logging, KryoRegistrator, SparkContext}
-import SparkContext._
+import spark.{Logging, SparkContext}
 import materialization._
 import cuboid._
 
 import org.apache.commons.cli._
-import com.esotericsoftware.kryo.Kryo
 import spark.storage.StorageLevel
 import java.util.Scanner
 
@@ -33,6 +31,7 @@ object SGraphCube extends Logging{
         options.addOption("sh","sparkHome",true,"Path to spark home installation, default : .")
         options.addOption("jar","jar",true,"Project jar, default : " +
           "target/scala-2.9.2/sgraph-cube_2.9.2-1.0.jar")
+        options.addOption("p","persist",false,"Cache the input graph while materializing")
         options
     }
 
@@ -89,11 +88,18 @@ object SGraphCube extends Logging{
 
     val inputGraph = sc.textFile(cmd.getOptionValue("inp")).map(parseLine(_))
 
+    if (cmd.hasOption("p")) {
+      logInfo("Persisting input graph")
+      inputGraph.persist((StorageLevel.MEMORY_ONLY_SER))
+    }
+
     /**
      * Materialization step
      */
+    val startMaterialization = System.currentTimeMillis()
     val cube = MinLevelStrategy.materialize(cmd.getOptionValue("k").toInt,cmd.getOptionValue("ml").toInt,
                 numberOfDimensions,CuboidEntry(AggregateFunction(""),Long.MaxValue,inputGraph))
+    println("Materialization time : " + (System.currentTimeMillis() - startMaterialization))
 
     val reader = new Scanner(System.in)
     var stop = false
@@ -127,18 +133,19 @@ object SGraphCube extends Logging{
           val graphAnalyser = new  GraphQuery(requestedGraph,reader)
           graphAnalyser.interact()
         }
+        //if you want to interact directly with the input graph
+        case "base" => {
+          val fun = AggregateFunction("")
+          val descendant = cube.getBaseCuboid.cuboid
+          val requestedGraph = CuboidQuery.generateCuboid(descendant, fun, numberOfDimensions)
+
+          val graphAnalyser = new  GraphQuery(requestedGraph,reader)
+          graphAnalyser.interact()
+        }
         case _ => println("wrongly formatted aggregate function")
       }
     }
 
-
-     /*
-    val cuboid = cube.getNearestDescendant(AggregateFunction("0,1,2,3,4,5,6"))
-    val rdd = cuboid.cuboid.map(entry => Pair(entry._1,entry._2))
-    rdd.persist(StorageLevel.MEMORY_AND_DISK_SER)
-    CuboidQuery.generateCuboid(rdd,AggregateFunction("0,1,3,4,5,6"),numberOfDimensions).saveAsTextFile("hdfs://localhost:54310/user/benoit/test")
-    CuboidQuery.generateCuboid(rdd,AggregateFunction("0,1,3,4,5,6"),numberOfDimensions).saveAsTextFile("hdfs://localhost:54310/user/benoit/test2")
-     */
     sc.stop()
   }
 
