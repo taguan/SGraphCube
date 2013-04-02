@@ -19,12 +19,14 @@ object MinLevelStrategy extends Logging {
           generateCuboid(count, aggregateLevel - 1, CombinationsGenerator.comb(aggregateLevel,numberOfDimensions))
         }
         case head :: tail => {
+          val startCuboidMat = System.currentTimeMillis()
           val fun = new AggregateFunction(head)
           logInfo("Materializing cuboid " + fun + " from base cuboid")
           val cuboid = CuboidQuery.generateCuboid(baseCuboid.cuboid, fun, numberOfDimensions)
           cuboid.persist(StorageLevel.DISK_ONLY)
 
           val size = cuboid.count()   //triggers the materialization of the cuboid
+          println("Cuboid " + fun + " materialized in " + (System.currentTimeMillis() - startCuboidMat))
           logInfo("Cuboid added to the graphcube, with size : " + size)
           graphCube.addCuboid(CuboidEntry(fun, size,cuboid))
           generateCuboid(count + 1, aggregateLevel, tail)

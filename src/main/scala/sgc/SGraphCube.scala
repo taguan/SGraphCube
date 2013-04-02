@@ -23,16 +23,16 @@ object SGraphCube extends Logging{
       options.addOption("h","help",false,"Display help")
       options.addOption("inp","inputPath",true,"Base graph input path, for " +
         "example : hdfs://namenode:54310/yourhdfspath")
-        options.addOption("k","maxCuboids",true,"Maximum number of cuboids to materialize")
-        options.addOption("ml","minLevel",true,"Starting dimension for the MinLevel algorithm")
-        options.addOption("n", "dimensions", true, "Number of dimensions")
-        options.addOption("sc","sparkContext",true,"Spark Context argument, for "
-          + "default : local[2]")
-        options.addOption("sh","sparkHome",true,"Path to spark home installation, default : .")
-        options.addOption("jar","jar",true,"Project jar, default : " +
-          "target/scala-2.9.2/sgraph-cube_2.9.2-1.0.jar")
-        options.addOption("p","persist",false,"Cache the input graph while materializing")
-        options
+      options.addOption("k","maxCuboids",true,"Maximum number of cuboids to materialize")
+      options.addOption("ml","minLevel",true,"Starting dimension for the MinLevel algorithm")
+      options.addOption("n", "dimensions", true, "Number of dimensions")
+      options.addOption("sc","sparkContext",true,"Spark Context argument, for "
+        + "default : local[2]")
+      options.addOption("sh","sparkHome",true,"Path to spark home installation, default : .")
+      options.addOption("jar","jar",true,"Project jar, default : " +
+        "target/scala-2.9.2/sgraph-cube_2.9.2-1.0.jar")
+      options.addOption("p","persist",false,"Cache the input graph while materializing")
+      options
     }
 
     /**
