@@ -30,14 +30,15 @@ class AggregateFunction (val dimToAggregate : Seq[Int]) extends Serializable {
 
   /**
    * Aggregates a vertex following this aggregate function
-   * @param vertex vertex to be aggregated (it is modified during the process)
+   * @param vertex vertex to be aggregated
    * @return the aggregated vertex (same object as input)
    */
   def aggregateVertex(vertex : ArrayVertexID) = {
+    val newVertex = vertex.clone()
     for(dim <- dimToAggregate){
-      vertex.setDimension(dim, vertex.getDimension(dim).getAggregate )
+      newVertex.setDimension(dim, vertex.getDimension(dim).getAggregate )
     }
-    vertex
+    newVertex
   }
 
   /**

@@ -18,6 +18,32 @@ class AggregateFunctionSuite extends FunSuite with BeforeAndAfter {
     assert(emptyFun.toString() === "")
   }
 
+  test("Crossboid aggregation"){
+    val fun2 = AggregateFunction("1")
+
+    val dimensionsVal = new Array[Dimension](4)
+    dimensionsVal(0) = new StringDimension("15")
+    dimensionsVal(1) = new StringDimension("male")
+    dimensionsVal(2) = new StringDimension("Belgium")
+    dimensionsVal(3) = new StringDimension("<21")
+    val vertex = new ArrayVertexID(dimensionsVal,4)
+    val unaryArray = new Array[ArrayVertexID](1)
+    unaryArray(0) = vertex
+    assert(AggregateFunction.crossAggregate(fun,fun2,unaryArray) === Pair("*₠male₠*₠*","15₠*₠Belgium₠<21") )
+
+    val dimensionsVal2 = new Array[Dimension](4)
+    dimensionsVal2(0) = new StringDimension("18")
+    dimensionsVal2(1) = new StringDimension("female")
+    dimensionsVal2(2) = new StringDimension("France")
+    dimensionsVal2(3) = new StringDimension("<21")
+    val vertex2 = new ArrayVertexID(dimensionsVal2,4)
+    val pair = new Array[ArrayVertexID](2)
+    pair(0) = vertex
+    pair(1) = vertex2
+    assert(AggregateFunction.crossAggregate(fun,fun2,pair) ===
+      Pair("*₠male₠*₠*ϱ18₠*₠France₠<21","*₠female₠*₠*ϱ15₠*₠Belgium₠<21"))
+  }
+
   test("Is Aggregated"){
     assert(fun.isAggregated(0))
     assert(fun.isAggregated(2))
@@ -56,12 +82,12 @@ class AggregateFunctionSuite extends FunSuite with BeforeAndAfter {
     dimensionsVal(3) = new StringDimension("<21")
     val vertex = new ArrayVertexID(dimensionsVal,4)
 
-    fun.aggregateVertex(vertex)
+    val newVertex = fun.aggregateVertex(vertex)
 
-    assert(vertex.getDimension(0).toString === "*")
-    assert(vertex.getDimension(1).toString === "male")
-    assert(vertex.getDimension(2).toString === "*")
-    assert(vertex.getDimension(3).toString === "*")
+    assert(newVertex.getDimension(0).toString === "*")
+    assert(newVertex.getDimension(1).toString === "male")
+    assert(newVertex.getDimension(2).toString === "*")
+    assert(newVertex.getDimension(3).toString === "*")
   }
 
   test("Is Descendant") {

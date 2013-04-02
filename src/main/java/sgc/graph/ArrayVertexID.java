@@ -15,6 +15,10 @@ public class ArrayVertexID {
 		this.dimensions = dimensions;
 	}
 
+    public ArrayVertexID clone(){
+        return new ArrayVertexID(this.dimensions.clone(),this.nbrOfDimensions);
+    }
+
 	public Dimension getDimension(int index){
 		return dimensions[index];
 	}
