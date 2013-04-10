@@ -1,1 +1,1 @@
-run -inp hdfs://localhost:54310/user/benoit/miniature.graph -k 10 -ml 3 -n 7
+run -inp /home/benoit/Desktop/reducedGraph.txt -k 1 -ml 3 -n 7

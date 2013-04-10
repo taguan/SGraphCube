@@ -96,6 +96,25 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
   }
 
   /**
+   * Updates the rdd of an entry with given func
+   * @param func  AggregateFunction representing the CuboidEntry to be modified
+   * @param newRDD   The newRDD (typically the same as previously with another StorageLevel)
+   * @return   True if a CuboidEntry has been updated, false otherwise
+   */
+  def modifyEntry(func : AggregateFunction, newRDD : RDD[Pair[String,Long]]) = {
+    val cuboidLevel = graphCube.get(getLevel(func))
+
+    for(i <- 0 until cuboidLevel.size()){
+      val cuboid = cuboidLevel.get(i)
+      if(cuboid.fun.equals(func)){
+        val newEntry = CuboidEntry(func, cuboid.size, newRDD)
+        cuboidLevel.set(i, newEntry)
+        true
+      }
+    }
+    false
+  }
+  /**
    * Generate a new cuboid corresponding to func according to Graph Cube techniques
    * if not already present in the GraphCube
    * If already materialized, changes the persistence level to MEMORY_AND_DISK if it
@@ -113,7 +132,7 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
           requestedGraph.persist(StorageLevel.MEMORY_AND_DISK) //we dont want to have to recompute the materialized cuboid
           //if it evicted from memory
           logInfo("Cuboid on disk marked to be loaded in memory (delayed action !)")
-          //modify entry in graphcube
+          this.modifyEntry(fun,requestedGraph)  //next time this entry will be used, the in memory version will be selected
 
           requestedGraph
         }

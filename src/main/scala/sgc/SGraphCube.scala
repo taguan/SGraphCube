@@ -2,7 +2,7 @@ package sgc
 
 import java.io.IOException
 
-import spark.{RDD, Logging, SparkContext}
+import spark.{Logging, SparkContext}
 import materialization._
 import cuboid._
 
@@ -134,31 +134,7 @@ object SGraphCube extends Logging{
     }
 
     def interactiveCrossboid() {
-      println("First aggregate function ? Ex : 0,2" +
-        "base for the base cuboid")
-      val regex = """\d+(,\d+)*""".r
-      val userEntry = reader.nextLine()
-      userEntry match{
-        case regex(_)  => {
-          val fun = AggregateFunction(userEntry)
-          val descendant = cube.getNearestDescendant(fun).cuboid
-          val requestedGraph = CuboidQuery.generateCuboid(descendant, fun, numberOfDimensions)
-          requestedGraph.persist(StorageLevel.MEMORY_ONLY)
-
-          val graphAnalyser = new  GraphQuery(requestedGraph,reader)
-          graphAnalyser.interact()
-        }
-        //if you want to interact directly with the input graph
-        case "base" => {
-          val fun = AggregateFunction("")
-          val descendant = cube.getBaseCuboid.cuboid
-          val requestedGraph = CuboidQuery.generateCuboid(descendant, fun, numberOfDimensions)
-
-          val graphAnalyser = new  GraphQuery(requestedGraph,reader)
-          graphAnalyser.interact()
-        }
-        case _ => println("wrongly formatted aggregate function")
-      }
+     .
     }
 
     sc.stop()

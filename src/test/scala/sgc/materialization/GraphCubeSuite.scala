@@ -17,6 +17,12 @@ class GraphCubeSuite extends FunSuite with BeforeAndAfter {
     graphCube.addCuboid(CuboidEntry(AggregateFunction("0,1"),15,null))
   }
 
+  /*
+   * Method generateOrGetCuboid should be tested but needs to actually run Spark because
+    * it uses StorageLevel
+    * TODO
+   */
+
   test("Get base cuboid"){
     assert(graphCube.getBaseCuboid.fun.equals(AggregateFunction("")))
   }
