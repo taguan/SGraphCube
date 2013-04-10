@@ -75,6 +75,12 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
 
   }
 
+  /**
+   * Gets the materialized cuboid representing func if presents
+   * in the GraphCube, NONE otherwise
+   * @param func  AggregateFunction representing the searched cuboid
+   * @return  The desired CuboidEntry, None if this cuboid is not in the GraphCube
+   */
   def get(func : AggregateFunction) : Option[CuboidEntry] = {
     val cuboidLevel = graphCube.get(getLevel(func))
 

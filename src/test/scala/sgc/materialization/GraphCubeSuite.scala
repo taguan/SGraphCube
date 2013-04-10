@@ -26,4 +26,25 @@ class GraphCubeSuite extends FunSuite with BeforeAndAfter {
     assert(graphCube.getNearestDescendant(AggregateFunction("1,2,3,4")).fun.equals(AggregateFunction("1,2,3")))
     assert(graphCube.getNearestDescendant(AggregateFunction("2,3,4,5")).fun.equals(AggregateFunction("")))  //minLevel property
   }
+
+  test("Get a cuboid in the graph cube"){
+    assert(graphCube.get(AggregateFunction("1,2,3")).getOrElse(fail("None returned wrongly")).size === 25)
+    assert(graphCube.get(AggregateFunction("3,4")).getOrElse(fail("None returned wrongly")).size === 20)
+    assert(graphCube.get(AggregateFunction("")).getOrElse(fail("None returned wrongly")).size === 1000)
+
+    graphCube.get(AggregateFunction("0,2")) match {
+      case None => assert(true)
+      case Some(cuboid) => fail("Wrongly returned " + cuboid)
+    }
+
+    graphCube.get(AggregateFunction("0")) match {
+      case None => assert(true)
+      case Some(cuboid) => fail("Wrongly returned " + cuboid)
+    }
+
+    graphCube.get(AggregateFunction("0,1,2")) match {
+      case None => assert(true)
+      case Some(cuboid) => fail("Wrongly returned " + cuboid)
+    }
+  }
 }

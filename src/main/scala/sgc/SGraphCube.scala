@@ -110,17 +110,47 @@ object SGraphCube extends Logging{
     while(!stop) {
       println("Waiting for a query.")
       println("cuboid")
+      println("crossboid")
       println("quit")
 
       reader.nextLine() match {
         case "cuboid" => interactiveCuboid()
+        case "crossboid" => interactiveCrossboid()
         case "quit" => stop = true
         case _ => println("Unrecognized command")
       }
     }
 
     def interactiveCuboid() {
-      println("Aggregate function ? Ex : 0,2")
+      println("Aggregate function ? Ex : 0,2 (type \"base\" for the base cuboid)")
+      val regex = """\d+(,\d+)*""".r
+      val userEntry = reader.nextLine()
+      userEntry match{
+        case regex(_)  => {
+          val fun = AggregateFunction(userEntry)
+          val descendant = cube.getNearestDescendant(fun).cuboid
+          val requestedGraph = CuboidQuery.generateCuboid(descendant, fun, numberOfDimensions)
+          requestedGraph.persist(StorageLevel.MEMORY_ONLY)
+
+          val graphAnalyser = new  GraphQuery(requestedGraph,reader)
+          graphAnalyser.interact()
+        }
+        //if you want to interact directly with the input graph
+        case "base" => {
+          val fun = AggregateFunction("")
+          val descendant = cube.getBaseCuboid.cuboid
+          val requestedGraph = CuboidQuery.generateCuboid(descendant, fun, numberOfDimensions)
+
+          val graphAnalyser = new  GraphQuery(requestedGraph,reader)
+          graphAnalyser.interact()
+        }
+        case _ => println("wrongly formatted aggregate function")
+      }
+    }
+
+    def interactiveCrossboid() {
+      println("First aggregate function ? Ex : 0,2" +
+        "base for the base cuboid")
       val regex = """\d+(,\d+)*""".r
       val userEntry = reader.nextLine()
       userEntry match{
