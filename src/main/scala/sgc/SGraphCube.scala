@@ -140,6 +140,7 @@ object SGraphCube extends Logging{
             case Some(fun2) => {
               val crossboid = CuboidQuery.generateCrossboid(cube.getNearestDescendant(fun1,fun2).cuboid,
                 fun1,fun2,numberOfDimensions)
+              crossboid.persist(StorageLevel.MEMORY_ONLY)
               val graphAnalyzer = new GraphQuery(crossboid,reader)
               graphAnalyzer.interact()
             }

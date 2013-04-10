@@ -1,1 +1,1 @@
-run -inp /home/benoit/Desktop/reducedGraph.txt -k 1 -ml 3 -n 7
+run -inp /home/benoit/Desktop/reducedGraph.txt/part-00000 -k 1 -ml 3 -n 7
