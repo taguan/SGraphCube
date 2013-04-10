@@ -33,18 +33,18 @@ class GraphCubeSuite extends FunSuite with BeforeAndAfter {
     assert(graphCube.get(AggregateFunction("")).getOrElse(fail("None returned wrongly")).size === 1000)
 
     graphCube.get(AggregateFunction("0,2")) match {
-      case None => assert(true)
       case Some(cuboid) => fail("Wrongly returned " + cuboid)
+      case None =>
     }
 
     graphCube.get(AggregateFunction("0")) match {
-      case None => assert(true)
       case Some(cuboid) => fail("Wrongly returned " + cuboid)
+      case None =>
     }
 
     graphCube.get(AggregateFunction("0,1,2")) match {
-      case None => assert(true)
       case Some(cuboid) => fail("Wrongly returned " + cuboid)
+      case None =>
     }
   }
 }
