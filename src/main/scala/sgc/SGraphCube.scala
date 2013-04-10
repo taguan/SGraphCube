@@ -2,11 +2,11 @@ package sgc
 
 import java.io.IOException
 
-import spark.{Logging, SparkContext}
+import spark.{RDD, Logging, SparkContext}
 import materialization._
 import cuboid._
 
-import org.apache.commons.cli._
+import org.apache.commons.cli.{Option => _, _}
 import spark.storage.StorageLevel
 import java.util.Scanner
 
@@ -121,30 +121,15 @@ object SGraphCube extends Logging{
       }
     }
 
-    def interactiveCuboid() {
-      println("Aggregate function ? Ex : 0,2 (type \"base\" for the base cuboid)")
-      val regex = """\d+(,\d+)*""".r
-      val userEntry = reader.nextLine()
-      userEntry match{
-        case regex(_)  => {
-          val fun = AggregateFunction(userEntry)
-          val descendant = cube.getNearestDescendant(fun).cuboid
-          val requestedGraph = CuboidQuery.generateCuboid(descendant, fun, numberOfDimensions)
-          requestedGraph.persist(StorageLevel.MEMORY_ONLY)
+    def interactiveCuboid(){
+      cuboidFromUser(reader) match {
+        case Some(fun) => {
 
-          val graphAnalyser = new  GraphQuery(requestedGraph,reader)
+          val graphAnalyser = new  GraphQuery(cube.generateOrGetCuboid(fun),reader)
           graphAnalyser.interact()
         }
-        //if you want to interact directly with the input graph
-        case "base" => {
-          val fun = AggregateFunction("")
-          val descendant = cube.getBaseCuboid.cuboid
-          val requestedGraph = CuboidQuery.generateCuboid(descendant, fun, numberOfDimensions)
 
-          val graphAnalyser = new  GraphQuery(requestedGraph,reader)
-          graphAnalyser.interact()
-        }
-        case _ => println("wrongly formatted aggregate function")
+        case None => println("Wrongly formatted cuboid")
       }
     }
 
@@ -179,6 +164,25 @@ object SGraphCube extends Logging{
     sc.stop()
   }
 
+  /**
+   * Interactively asks the user for a cuboid
+   * @param reader  A java scanner
+   * @return  The aggregate function corresponding to the user query
+   *          or None if the user input is wrongly formatted
+   */
+  def cuboidFromUser(reader : Scanner) : Option[AggregateFunction] = {
+    println("Aggregate function ? Ex : 0,2 (type \"base\" for the base cuboid)")
+    val regex = """\d+(,\d+)*""".r
+    val userEntry = reader.nextLine()
+    userEntry match{
+      case regex(_)  => Some(AggregateFunction(userEntry))
+
+      //if you want to interact directly with the input graph
+      case "base" => Some(AggregateFunction(""))
+
+      case _ => None
+    }
+  }
 
   /**
    * Parses a key value Pair from a line around a tab character

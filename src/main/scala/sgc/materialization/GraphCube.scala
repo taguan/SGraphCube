@@ -1,9 +1,11 @@
 package sgc.materialization
 
 import java.util
-import sgc.cuboid.{AggregateFunction, CuboidEntry}
+import sgc.cuboid.{CuboidQuery, AggregateFunction, CuboidEntry}
+import spark.{Logging, RDD}
+import spark.storage.StorageLevel
 
-class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEntry) {
+class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEntry) extends Logging {
 
   //INIT BLOCK
   val graphCube = new util.ArrayList[util.ArrayList[CuboidEntry]](numberOfDimensions + 1)
@@ -93,6 +95,47 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
     None
   }
 
+  /**
+   * Generate a new cuboid corresponding to func according to Graph Cube techniques
+   * if not already present in the GraphCube
+   * If already materialized, changes the persistence level to MEMORY_AND_DISK if it
+   * was stored on DISK_ONLY
+   * @param fun The AggregateFunction of the desired cuboid
+   * @return  The cuboid on its RDD form
+   */
+  def generateOrGetCuboid(fun : AggregateFunction) : RDD[Pair[String,Long]] = {
+    this.get(fun) match {
+      case Some(cuboidEntry) => {
+        logInfo("Cuboid " + fun + " has been found in the graph cube" )
+        if (cuboidEntry.cuboid.getStorageLevel == StorageLevel.DISK_ONLY){  //it was a cuboid from materialization step
+          val requestedGraph = cuboidEntry.cuboid.map(entry => entry)  //this is useless but we have to create
+          //a new RDD as Spark cannot change persistence level
+          requestedGraph.persist(StorageLevel.MEMORY_AND_DISK) //we dont want to have to recompute the materialized cuboid
+          //if it evicted from memory
+          logInfo("Cuboid on disk marked to be loaded in memory (delayed action !)")
+          //modify entry in graphcube
+
+          requestedGraph
+        }
+        else{
+          cuboidEntry.cuboid
+        }
+      }
+      case None => {
+        //apply the graphcube method to compute the cuboid
+        val descendant = this.getNearestDescendant(fun)
+        logInfo("Descendant found : " + descendant.fun + " of size " + descendant.size)
+        val requestedGraph = CuboidQuery.generateCuboid(descendant.cuboid, fun, numberOfDimensions)
+        requestedGraph.persist(StorageLevel.MEMORY_ONLY)
+        val cuboidSize = requestedGraph.count()
+        logInfo("Size of new cuboid : " + cuboidSize)
+        this.addCuboid(CuboidEntry(fun,cuboidSize,requestedGraph))
+
+        requestedGraph
+      }
+    }
+
+  }
 
   def getLevel(func : AggregateFunction) = {
     numberOfDimensions - func.dimToAggregate.size
