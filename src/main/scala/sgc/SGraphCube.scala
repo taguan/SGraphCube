@@ -134,7 +134,19 @@ object SGraphCube extends Logging{
     }
 
     def interactiveCrossboid() {
-     .
+      cuboidFromUser(reader) match {
+        case Some(fun1) => {
+          cuboidFromUser(reader) match {
+            case Some(fun2) => {
+              //perform crossboid request
+            }
+
+            case None => println("Wrongly formatted cuboid")
+          }
+        }
+
+        case None => println("Wrongly formatted cuboid")
+      }
     }
 
     sc.stop()

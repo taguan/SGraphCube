@@ -30,7 +30,11 @@ class GraphCubeSuite extends FunSuite with BeforeAndAfter {
   test("Get Nearest Descendant"){
     assert(graphCube.getNearestDescendant(AggregateFunction("0,1,2,3")).fun.equals(AggregateFunction("0,2,3")))
     assert(graphCube.getNearestDescendant(AggregateFunction("1,2,3,4")).fun.equals(AggregateFunction("1,2,3")))
-    assert(graphCube.getNearestDescendant(AggregateFunction("2,3,4,5")).fun.equals(AggregateFunction("")))  //minLevel property
+    assert(graphCube.getNearestDescendant(AggregateFunction("2,3,4,5")).fun.equals(AggregateFunction("3,4")))
+    assert(graphCube.getNearestDescendant(AggregateFunction("1,3,5")).fun.equals(AggregateFunction("")))
+
+    assert(graphCube.getNearestDescendant(AggregateFunction("0,1,2,3"),AggregateFunction("1,2,3,4")).fun.equals(
+      AggregateFunction("1,2,3")))
   }
 
   test("Get a cuboid in the graph cube"){

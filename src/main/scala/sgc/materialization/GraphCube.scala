@@ -47,35 +47,43 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
   }
 
   /**
-   * Gets the nearest descendant cuboid stored in the graphcube.
-   * Use MinLevel properties to speed up the search
+   * Gets the nearest common descendant  stored in the graphcube
    */
-  def getNearestDescendant(func : AggregateFunction) : CuboidEntry = {
-      var level = getLevel(func)
+  def getNearestDescendant(funs : AggregateFunction*) : CuboidEntry = {
+    def getMaxLevel(index : Int, max : Int) : Int = {
+      if (index == funs.length) return max
+      if (getLevel(funs(index)) > max) getMaxLevel(index + 1, getLevel(funs(index)))
+      else getMaxLevel(index + 1, max)
+    }
 
-      if(level == numberOfDimensions){ // base cuboid
-        return getBaseCuboid
-      }
+    def allDescendants(index : Int, fun : AggregateFunction) : Boolean = {
+      if (index == funs.length) return true
+      if (!fun.isDescendant(funs(index))) return false
+      allDescendants(index + 1, fun)
+    }
 
-      level = level + 1 //closest descendant level
-      while(level <= minLevel){
+    var level = getMaxLevel(0, -1)
 
-        val descendantLevel = graphCube.get(level)
+    if(level == numberOfDimensions){ // base cuboid
+      return getBaseCuboid
+    }
 
-        for(i <- 0 until descendantLevel.size()){
-          val cuboid = descendantLevel.get(i)
-          if(cuboid.fun.isDescendant(func)){
-            return cuboid
-          }
+    while(level < numberOfDimensions){
+
+      val descendantLevel = graphCube.get(level)
+
+      for(i <- 0 until descendantLevel.size()){
+        val cuboid = descendantLevel.get(i)
+        if(allDescendants(0,cuboid.fun)){
+          return cuboid
         }
-        level = level + 1
       }
+      level = level + 1
+    }
 
-      //property of MinLevel, if no descendant found in the minLevel descendants, then the nearest
-      //descendant must be the base cuboid
-    graphCube.get(numberOfDimensions).get(0)
-
+    getBaseCuboid
   }
+
 
   /**
    * Gets the materialized cuboid representing func if presents
