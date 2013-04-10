@@ -138,7 +138,10 @@ object SGraphCube extends Logging{
         case Some(fun1) => {
           cuboidFromUser(reader) match {
             case Some(fun2) => {
-              //perform crossboid request
+              val crossboid = CuboidQuery.generateCrossboid(cube.getNearestDescendant(fun1,fun2).cuboid,
+                fun1,fun2,numberOfDimensions)
+              val graphAnalyzer = new GraphQuery(crossboid,reader)
+              graphAnalyzer.interact()
             }
 
             case None => println("Wrongly formatted cuboid")
