@@ -25,7 +25,7 @@ object BagelProcessing {
     (new SliceDiceVertex(self.dimensionValues, self.weight, self.outEdges, false, true), outbox)
   }
 
-  def generateVertices(aggregateNetwork : RDD[Pair[String,Long]]) : RDD[SliceDiceVertex] = {
+  def generateVertices(aggregateNetwork : RDD[Pair[String,Long]]) : RDD[(String,SliceDiceVertex)] = {
     val inter : RDD[(String, SliceDiceVertex)] = aggregateNetwork.flatMap(entry => {
       val vertexOrEdge = VertexIDParser.parseID(entry._1)
       if (vertexOrEdge.length == 1){ // it is a vertex
@@ -38,7 +38,7 @@ object BagelProcessing {
           Pair(vertex2, new SliceDiceVertex(vertex2,0,Set(Pair(vertex1,entry._2)))))
       }
     })
-    inter.reduceByKey((vertex1,vertex2) => vertex1.merge(vertex2)).map(entry => entry._2)
+    inter.reduceByKey((vertex1,vertex2) => vertex1.merge(vertex2))
   }
 
 
@@ -71,7 +71,7 @@ class SliceDiceVertex() extends Vertex  with Serializable {
     this
   }
 
-  override def toString() = {
+  override def toString = {
     val strb = new StringBuilder()
     strb.append(dimensionValues + "  " + weight)
     for (edge <- outEdges){

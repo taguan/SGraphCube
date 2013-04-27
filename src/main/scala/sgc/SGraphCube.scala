@@ -126,7 +126,7 @@ object SGraphCube extends Logging{
       cuboidFromUser(reader) match {
         case Some(fun) => {
 
-          val graphAnalyser = new  GraphQuery(cube.generateOrGetCuboid(fun),reader)
+          val graphAnalyser = new  GraphQuery(cube.generateOrGetCuboid(fun),reader,sc)
           graphAnalyser.interact()
         }
 
@@ -144,7 +144,7 @@ object SGraphCube extends Logging{
               val crossboid = CuboidQuery.generateCrossboid(descendant.cuboid,
                 fun1,fun2,numberOfDimensions)
               crossboid.persist(StorageLevel.MEMORY_ONLY)
-              val graphAnalyzer = new GraphQuery(crossboid,reader)
+              val graphAnalyzer = new GraphQuery(crossboid,reader,sc)
               graphAnalyzer.interact()
             }
 

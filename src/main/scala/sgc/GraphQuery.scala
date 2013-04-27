@@ -1,14 +1,16 @@
 package sgc
 
-import spark.RDD
+import spark.{SparkContext, RDD}
 import java.util.Scanner
+import spark.bagel._
 
-class GraphQuery(graph : RDD[Pair[String,Long]], reader : Scanner) {
+class GraphQuery(graph : RDD[Pair[String,Long]], reader : Scanner, sc : SparkContext) {
 
   def interact(){
     var stop = false
     while(!stop){
       println("Waiting for a query on the selected graph.")
+      println("slice")
       println("first")
       println("count")
       println("save")
@@ -17,6 +19,7 @@ class GraphQuery(graph : RDD[Pair[String,Long]], reader : Scanner) {
       val startCommand = System.currentTimeMillis()
 
       reader.nextLine() match {
+        case "slice" => sliceDice()
         case "first" => first()
         case "count" => count()
         case "save" => save()
@@ -26,6 +29,16 @@ class GraphQuery(graph : RDD[Pair[String,Long]], reader : Scanner) {
 
       println("Time elapsed : " + (System.currentTimeMillis() - startCommand))
     }
+  }
+
+  def sliceDice(){
+    println("How many supersteps ?")
+    val emptyMsgs = sc.parallelize(Array[(String,SliceDiceMessage)]())
+
+    val result = Bagel.run(sc, BagelProcessing.generateVertices(graph), emptyMsgs, combiner = new SliceDiceCombiner(),
+      numPartitions = sc.defaultParallelism) (BagelProcessing.compute(reader.nextLine().toInt))
+
+    result.foreach(entry => println(entry._2))
   }
 
   def first(){
