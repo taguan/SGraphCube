@@ -70,6 +70,16 @@ class SliceDiceVertex() extends Vertex  with Serializable {
     this .addEdge(other.outEdges)
     this
   }
+
+  override def toString() = {
+    val strb = new StringBuilder()
+    strb.append(dimensionValues + "  " + weight)
+    for (edge <- outEdges){
+      strb.append("\t")
+      strb.append(edge)
+    }
+    strb.toString()
+  }
 }
 
 class SliceDiceMessage() extends Message[String] with Serializable {
