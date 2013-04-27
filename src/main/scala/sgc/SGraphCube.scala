@@ -81,6 +81,7 @@ object SGraphCube extends Logging{
      * Initialization of the spark environment
      */ 
     System.setProperty("spark.serializer", "spark.KryoSerializer")
+    System.setProperty("spark.kryo.registrator", classOf[SliceDiceKryoRegistrator].getName)
 
     val sc = new SparkContext(cmd.getOptionValue("sc","local[2]"),"SGraphCube",
       cmd.getOptionValue("sh","."), List(cmd.getOptionValue("jar",
@@ -138,7 +139,9 @@ object SGraphCube extends Logging{
         case Some(fun1) => {
           cuboidFromUser(reader) match {
             case Some(fun2) => {
-              val crossboid = CuboidQuery.generateCrossboid(cube.getNearestDescendant(fun1,fun2).cuboid,
+              val descendant = cube.getNearestDescendant(fun1,fun2)
+              logInfo("Nearest descendant : " + descendant.fun + " size : " + descendant.size)
+              val crossboid = CuboidQuery.generateCrossboid(descendant.cuboid,
                 fun1,fun2,numberOfDimensions)
               crossboid.persist(StorageLevel.MEMORY_ONLY)
               val graphAnalyzer = new GraphQuery(crossboid,reader)
