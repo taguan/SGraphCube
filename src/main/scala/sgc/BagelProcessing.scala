@@ -11,7 +11,7 @@ object BagelProcessing {
   def compute(maxDiameter : Int)
              (self : SliceDiceVertex, originators : Option[Set[String]], superstep : Int
                ): (SliceDiceVertex, Array[SliceDiceMessage]) = {
-    if (superstep >= maxDiameter){   //time to finish
+    if (superstep > maxDiameter){   //time to finish
       return(new SliceDiceVertex(self.dimensionValues, self.weight, self.outEdges,false, true),
         Array[SliceDiceMessage]())
     }
@@ -86,7 +86,7 @@ class SliceDiceMessage() extends Message[String] with Serializable {
   var targetId : String = _
   var originators : Set[String] = _
 
-  def this(targetId : String, originators : Set[String]){
+  def this(targetId : String, originators : Set[String] = Set()){
     this()
     this.targetId = targetId
     this.originators = originators
