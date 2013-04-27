@@ -11,7 +11,12 @@ object BagelProcessing {
   def compute(maxDiameter : Int)
              (self : SliceDiceVertex, originators : Option[Set[String]], superstep : Int
                ): (SliceDiceVertex, Array[SliceDiceMessage]) = {
-    if (superstep > maxDiameter){   //time to finish
+    if (originators == None){ //desactivate it
+      return(new SliceDiceVertex(self.dimensionValues, self.weight, self.outEdges,false, self.toReturn),
+        Array[SliceDiceMessage]())
+    }
+
+    if (superstep >= maxDiameter){   //time to finish
       return(new SliceDiceVertex(self.dimensionValues, self.weight, self.outEdges,false, true),
         Array[SliceDiceMessage]())
     }
@@ -74,6 +79,7 @@ class SliceDiceVertex() extends Vertex  with Serializable {
   override def toString = {
     val strb = new StringBuilder()
     strb.append(dimensionValues + "  " + weight)
+    strb.append("\n")
     for (edge <- outEdges){
       strb.append("\t")
       strb.append(edge)

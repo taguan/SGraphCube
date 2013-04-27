@@ -32,15 +32,20 @@ class GraphQuery(graph : RDD[Pair[String,Long]], reader : Scanner, sc : SparkCon
   }
 
   def sliceDice(){
-    println("How many supersteps ?")
     val vertices = BagelProcessing.generateVertices(graph).cache()
+    val firstVertex = vertices.first()._1
+    println("First vertex : " + firstVertex)
     val initialMsg = sc.parallelize(Array(
-      Pair(vertices.first()._1, new SliceDiceMessage(vertices.first()._1))))
+      Pair(firstVertex, new SliceDiceMessage(firstVertex))))
 
+    println("How many supersteps ?")
     val result = Bagel.run(sc, vertices, initialMsg, combiner = new SliceDiceCombiner(),
       numPartitions = sc.defaultParallelism) (BagelProcessing.compute(reader.nextLine().toInt))
+    .filter(entry => entry._2.toReturn)
 
-    result.foreach(entry => println(entry._2))
+    println("Output path to save ?")
+    result.map(entry => entry._2).saveAsTextFile(reader.nextLine())
+
   }
 
   def first(){
