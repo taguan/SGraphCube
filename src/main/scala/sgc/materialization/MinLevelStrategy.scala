@@ -22,7 +22,7 @@ object MinLevelStrategy extends Logging {
           val startCuboidMat = System.currentTimeMillis()
           val fun = new AggregateFunction(head)
           logInfo("Materializing cuboid " + fun + " from base cuboid")
-          val cuboid = CuboidQuery.generateCuboid(baseCuboid.cuboid, fun, numberOfDimensions)
+          val cuboid = CuboidQuery.generateCuboid(baseCuboid.cuboid, fun)
           cuboid.persist(StorageLevel.DISK_ONLY)
 
           val size = cuboid.count()   //triggers the materialization of the cuboid

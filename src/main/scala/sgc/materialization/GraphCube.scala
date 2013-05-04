@@ -152,7 +152,7 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
         //apply the graphcube method to compute the cuboid
         val descendant = this.getNearestDescendant(fun)
         logInfo("Descendant found : " + descendant.fun + " of size " + descendant.size)
-        val requestedGraph = CuboidQuery.generateCuboid(descendant.cuboid, fun, numberOfDimensions)
+        val requestedGraph = CuboidQuery.generateCuboid(descendant.cuboid, fun)
         requestedGraph.persist(StorageLevel.MEMORY_ONLY)
         val cuboidSize = requestedGraph.count()
         logInfo("Size of new cuboid : " + cuboidSize)
