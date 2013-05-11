@@ -43,8 +43,9 @@ class GraphQuery(graph : RDD[Pair[String,Long]], reader : Scanner, sc : SparkCon
       numPartitions = sc.defaultParallelism) (BagelProcessing.compute(reader.nextLine().toInt))
     .filter(entry => entry._2.toReturn)
 
+    /* commented for test purpose
     println("Output path to save ?")
-    result.map(entry => entry._2).saveAsTextFile(reader.nextLine())
+    result.map(entry => entry._2).saveAsTextFile(reader.nextLine())  */
 
   }
 

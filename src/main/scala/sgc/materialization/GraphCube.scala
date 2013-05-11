@@ -134,6 +134,7 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
     this.get(fun) match {
       case Some(cuboidEntry) => {
         logInfo("Cuboid " + fun + " has been found in the graph cube" )
+        println("Cuboid " + fun + " has been found in the graph cube" )
         if (cuboidEntry.cuboid.getStorageLevel == StorageLevel.DISK_ONLY){  //it was a cuboid from materialization step
           val requestedGraph = cuboidEntry.cuboid.map(entry => entry)  //this is useless but we have to create
           //a new RDD as Spark cannot change persistence level
@@ -150,13 +151,16 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
       }
       case None => {
         //apply the graphcube method to compute the cuboid
+        val startTimer = System.currentTimeMillis()
         val descendant = this.getNearestDescendant(fun)
         logInfo("Descendant found : " + descendant.fun + " of size " + descendant.size)
+        println("Descendant found : " + descendant.fun + " of size " + descendant.size)
         val requestedGraph = CuboidQuery.generateCuboid(descendant.cuboid, fun)
         requestedGraph.persist(StorageLevel.MEMORY_ONLY)
         val cuboidSize = requestedGraph.count()
         logInfo("Size of new cuboid : " + cuboidSize)
         this.addCuboid(CuboidEntry(fun,cuboidSize,requestedGraph))
+        println("Time to materialize cuboid : " + (System.currentTimeMillis() - startTimer))
 
         requestedGraph
       }

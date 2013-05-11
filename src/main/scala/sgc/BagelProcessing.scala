@@ -11,7 +11,7 @@ object BagelProcessing {
   def compute(maxDiameter : Int)
              (self : SliceDiceVertex, originators : Option[Set[String]], superstep : Int
                ): (SliceDiceVertex, Array[SliceDiceMessage]) = {
-    if (originators == None){ //desactivate it
+    if (originators == None || self.toReturn){ //desactivate it
       return(new SliceDiceVertex(self.dimensionValues, self.weight, self.outEdges,false, self.toReturn),
         Array[SliceDiceMessage]())
     }
@@ -72,7 +72,7 @@ class SliceDiceVertex() extends Vertex  with Serializable {
 
   def merge(other : SliceDiceVertex) : SliceDiceVertex = {
     this.weight = this.weight + other.weight
-    this .addEdge(other.outEdges)
+    this.addEdge(other.outEdges)
     this
   }
 
