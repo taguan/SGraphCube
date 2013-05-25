@@ -1,7 +1,7 @@
 package sgc.materialization
 
 import java.util
-import sgc.cuboid.{CuboidQuery, AggregateFunction, CuboidEntry}
+import sgc.cuboid.{CuboidQuery, Cuboid, CuboidEntry}
 import spark.{Logging, RDD}
 import spark.storage.StorageLevel
 
@@ -49,14 +49,14 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
   /**
    * Gets the nearest common descendant  stored in the graphcube
    */
-  def getNearestDescendant(funs : AggregateFunction*) : CuboidEntry = {
+  def getNearestDescendant(funs : Cuboid*) : CuboidEntry = {
     def getMaxLevel(index : Int, max : Int) : Int = {
       if (index == funs.length) return max
       if (getLevel(funs(index)) > max) getMaxLevel(index + 1, getLevel(funs(index)))
       else getMaxLevel(index + 1, max)
     }
 
-    def allDescendants(index : Int, fun : AggregateFunction) : Boolean = {
+    def allDescendants(index : Int, fun : Cuboid) : Boolean = {
       if (index == funs.length) return true
       if (!fun.isDescendant(funs(index))) return false
       allDescendants(index + 1, fun)
@@ -88,10 +88,10 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
   /**
    * Gets the materialized cuboid representing func if presents
    * in the GraphCube, NONE otherwise
-   * @param func  AggregateFunction representing the searched cuboid
+   * @param func  Cuboid representing the searched cuboid
    * @return  The desired CuboidEntry, None if this cuboid is not in the GraphCube
    */
-  def get(func : AggregateFunction) : Option[CuboidEntry] = {
+  def get(func : Cuboid) : Option[CuboidEntry] = {
     val cuboidLevel = graphCube.get(getLevel(func))
 
     for(i <- 0 until cuboidLevel.size()){
@@ -105,11 +105,11 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
 
   /**
    * Updates the rdd of an entry with given func
-   * @param func  AggregateFunction representing the CuboidEntry to be modified
+   * @param func  Cuboid representing the CuboidEntry to be modified
    * @param newRDD   The newRDD (typically the same as previously with another StorageLevel)
    * @return   True if a CuboidEntry has been updated, false otherwise
    */
-  def modifyEntry(func : AggregateFunction, newRDD : RDD[Pair[String,Long]]) = {
+  def modifyEntry(func : Cuboid, newRDD : RDD[Pair[String,Long]]) = {
     val cuboidLevel = graphCube.get(getLevel(func))
 
     for(i <- 0 until cuboidLevel.size()){
@@ -127,10 +127,10 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
    * if not already present in the GraphCube
    * If already materialized, changes the persistence level to MEMORY_AND_DISK if it
    * was stored on DISK_ONLY
-   * @param fun The AggregateFunction of the desired cuboid
+   * @param fun The Cuboid of the desired cuboid
    * @return  The cuboid on its RDD form
    */
-  def generateOrGetCuboid(fun : AggregateFunction) : RDD[Pair[String,Long]] = {
+  def generateOrGetCuboid(fun : Cuboid) : RDD[Pair[String,Long]] = {
     this.get(fun) match {
       case Some(cuboidEntry) => {
         logInfo("Cuboid " + fun + " has been found in the graph cube" )
@@ -155,7 +155,7 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
         val descendant = this.getNearestDescendant(fun)
         logInfo("Descendant found : " + descendant.fun + " of size " + descendant.size)
         println("Descendant found : " + descendant.fun + " of size " + descendant.size)
-        val requestedGraph = CuboidQuery.generateCuboid(descendant.cuboid, fun)
+        val requestedGraph = CuboidQuery.cuboidQuery(descendant.cuboid, fun)
         requestedGraph.persist(StorageLevel.MEMORY_ONLY)
         val cuboidSize = requestedGraph.count()
         logInfo("Size of new cuboid : " + cuboidSize)
@@ -168,7 +168,7 @@ class GraphCube(numberOfDimensions : Int, minLevel : Int, baseCuboid : CuboidEnt
 
   }
 
-  def getLevel(func : AggregateFunction) = {
+  def getLevel(func : Cuboid) = {
     numberOfDimensions - func.dimToAggregate.size
   }
 

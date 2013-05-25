@@ -99,7 +99,7 @@ object SGraphCube extends Logging{
      */
     val startMaterialization = System.currentTimeMillis()
     val cube = MinLevelStrategy.materialize(cmd.getOptionValue("k").toInt,cmd.getOptionValue("ml").toInt,
-                numberOfDimensions,CuboidEntry(AggregateFunction(""),Long.MaxValue,inputGraph))
+                numberOfDimensions,CuboidEntry(Cuboid(""),Long.MaxValue,inputGraph))
     println("Materialization time : " + (System.currentTimeMillis() - startMaterialization))
 
     val reader = new Scanner(System.in)
@@ -141,7 +141,7 @@ object SGraphCube extends Logging{
             case Some(fun2) => {
               val descendant = cube.getNearestDescendant(fun1,fun2)
               logInfo("Nearest descendant : " + descendant.fun + " size : " + descendant.size)
-              val crossboid = CuboidQuery.generateCrossboid(descendant.cuboid,
+              val crossboid = CuboidQuery.crossboidQuery(descendant.cuboid,
                 fun1,fun2)
               crossboid.persist(StorageLevel.MEMORY_ONLY)
               val graphAnalyzer = new GraphQuery(crossboid,reader,sc)
@@ -165,15 +165,15 @@ object SGraphCube extends Logging{
    * @return  The aggregate function corresponding to the user query
    *          or None if the user input is wrongly formatted
    */
-  def cuboidFromUser(reader : Scanner) : Option[AggregateFunction] = {
+  def cuboidFromUser(reader : Scanner) : Option[Cuboid] = {
     println("Aggregate function ? Ex : 0,2 (type \"base\" for the base cuboid)")
     val regex = """\d+(,\d+)*""".r
     val userEntry = reader.nextLine()
     userEntry match{
-      case regex(_)  => Some(AggregateFunction(userEntry))
+      case regex(_)  => Some(Cuboid(userEntry))
 
       //if you want to interact directly with the input graph
-      case "base" => Some(AggregateFunction(""))
+      case "base" => Some(Cuboid(""))
 
       case _ => None
     }

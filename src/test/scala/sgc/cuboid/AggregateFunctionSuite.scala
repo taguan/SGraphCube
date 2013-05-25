@@ -6,20 +6,20 @@ import sgc.graph._
 
 class AggregateFunctionSuite extends FunSuite with BeforeAndAfter {
 
-  var fun : AggregateFunction = _
+  var fun : Cuboid = _
 
   before {
-    fun = AggregateFunction("0,2,3")
+    fun = Cuboid("0,2,3")
   }
 
   test("string apply"){
     assert(fun.toString() === "0,2,3")
-    val emptyFun = AggregateFunction("")
+    val emptyFun = Cuboid("")
     assert(emptyFun.toString() === "")
   }
 
   test("Crossboid aggregation"){
-    val fun2 = AggregateFunction("1")
+    val fun2 = Cuboid("1")
 
     val dimensionsVal = new Array[Dimension](4)
     dimensionsVal(0) = new StringDimension("15")
@@ -29,7 +29,7 @@ class AggregateFunctionSuite extends FunSuite with BeforeAndAfter {
     val vertex = new ArrayVertexID(dimensionsVal,4)
     val unaryArray = new Array[ArrayVertexID](1)
     unaryArray(0) = vertex
-    assert(AggregateFunction.crossAggregate(fun,fun2,unaryArray) === Pair("*₠male₠*₠*","15₠*₠Belgium₠<21") )
+    assert(Cuboid.crossAggregate(fun,fun2,unaryArray) === Pair("*₠male₠*₠*","15₠*₠Belgium₠<21") )
 
     val dimensionsVal2 = new Array[Dimension](4)
     dimensionsVal2(0) = new StringDimension("18")
@@ -40,7 +40,7 @@ class AggregateFunctionSuite extends FunSuite with BeforeAndAfter {
     val pair = new Array[ArrayVertexID](2)
     pair(0) = vertex
     pair(1) = vertex2
-    assert(AggregateFunction.crossAggregate(fun,fun2,pair) ===
+    assert(Cuboid.crossAggregate(fun,fun2,pair) ===
       Pair("*₠male₠*₠*ϱ18₠*₠France₠<21","*₠female₠*₠*ϱ15₠*₠Belgium₠<21"))
   }
 
@@ -91,17 +91,17 @@ class AggregateFunctionSuite extends FunSuite with BeforeAndAfter {
   }
 
   test("Is Descendant") {
-    val fun1 = AggregateFunction("0,1,2,3")
+    val fun1 = Cuboid("0,1,2,3")
     assert(fun.isDescendant(fun1))
-    //assert(!fun1.isDescendant(fun))
+    //assert(!fun1.isDescendant(cub))
 
-    val fun2 = AggregateFunction("")
+    val fun2 = Cuboid("")
     assert(fun2.isDescendant(fun))
 
-    val fun3 = AggregateFunction ("0,1")
+    val fun3 = Cuboid ("0,1")
     assert(!fun3.isDescendant(fun))
 
-    val fun4 = AggregateFunction("0,2")
+    val fun4 = Cuboid("0,2")
     assert(fun4.isDescendant(fun))
   }
 

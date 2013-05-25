@@ -1,6 +1,6 @@
 package sgc.materialization
 
-import sgc.cuboid.{CuboidQuery, AggregateFunction, CuboidEntry}
+import sgc.cuboid.{CuboidQuery, Cuboid, CuboidEntry}
 import spark.storage.StorageLevel
 import spark.Logging
 
@@ -20,9 +20,9 @@ object MinLevelStrategy extends Logging {
         }
         case head :: tail => {
           val startCuboidMat = System.currentTimeMillis()
-          val fun = new AggregateFunction(head)
+          val fun = new Cuboid(head)
           logInfo("Materializing cuboid " + fun + " from base cuboid")
-          val cuboid = CuboidQuery.generateCuboid(baseCuboid.cuboid, fun)
+          val cuboid = CuboidQuery.cuboidQuery(baseCuboid.cuboid, fun)
           cuboid.persist(StorageLevel.DISK_ONLY)
 
           val size = cuboid.count()   //triggers the materialization of the cuboid

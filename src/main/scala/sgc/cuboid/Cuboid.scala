@@ -2,7 +2,7 @@ package sgc.cuboid
 
 import sgc.graph.ArrayVertexID
 
-class AggregateFunction (val dimToAggregate : Seq[Int]) extends Serializable {
+class Cuboid (val dimToAggregate : Seq[Int]) extends Serializable {
 
   /**
    * Tells if a dimension is aggregated within this function
@@ -48,7 +48,7 @@ class AggregateFunction (val dimToAggregate : Seq[Int]) extends Serializable {
    ** 
    ** @param inputFunction Function to be compared
    **/
-  def isDescendant(fun : AggregateFunction) : Boolean = {
+  def isDescendant(fun : Cuboid) : Boolean = {
     for(dim <- dimToAggregate){
       if(!fun.isAggregated(dim)) return false
     }
@@ -61,14 +61,14 @@ class AggregateFunction (val dimToAggregate : Seq[Int]) extends Serializable {
 
   override def equals(that : Any) : Boolean = {
     that match {
-      case fun : AggregateFunction => fun.dimToAggregate.equals(this.dimToAggregate)
+      case fun : Cuboid => fun.dimToAggregate.equals(this.dimToAggregate)
       case _ => false
     }
   }
   
 }
 
-object AggregateFunction {
+object Cuboid {
 
   /**
    * Aggregate an entry (a vertex or an edge) following the crossboid algorithm.
@@ -81,7 +81,7 @@ object AggregateFunction {
    * @param entry A vertex or Edge
    * @return  The two aggregated vertices / edges
    */
-  def crossAggregate(fun1: AggregateFunction, fun2: AggregateFunction, entry: Array[ArrayVertexID]): Pair[String,String] = {
+  def crossAggregate(fun1: Cuboid, fun2: Cuboid, entry: Array[ArrayVertexID]): Pair[String,String] = {
     if (entry.length == 1){ // this is a vertex
       return Pair(fun1.aggregateVertex(entry(0)).toString("₠"),fun2.aggregateVertex(entry(0)).toString("₠"))
     }
@@ -93,10 +93,10 @@ object AggregateFunction {
     }
   }
 
-  def apply(stringRep : String) : AggregateFunction= {
-      if(stringRep.length == 0) return new AggregateFunction(List())
+  def apply(stringRep : String) : Cuboid= {
+      if(stringRep.length == 0) return new Cuboid(List())
       val explode = stringRep.split(",")
-      new AggregateFunction(explode.iterator.toList.map(_.toInt))
+      new Cuboid(explode.iterator.toList.map(_.toInt))
     }
 }
 
