@@ -166,7 +166,7 @@ object SGraphCube extends Logging{
    *          or None if the user input is wrongly formatted
    */
   def cuboidFromUser(reader : Scanner) : Option[Cuboid] = {
-    println("Aggregate function ? Ex : 0,2 (type \"base\" for the base cuboid)")
+    println("Cuboid function ? Ex : 0,2 (type \"base\" for the base cuboid)")
     val regex = """\d+(,\d+)*""".r
     val userEntry = reader.nextLine()
     userEntry match{
